@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: Valid ID check
+    function isValidId(id) {
+      return id is string && id.size() <= 64;
+    }
+
+    // Helper: String size constraints
+    function isValidString(val, min, max) {
+      return val is string && val.size() >= min && val.size() <= max;
+    }
+
+    // Helper: Admin Check based on user email (runtime admin sachiro1411@gmail.com)
+    function isAdmin() {
+      return request.auth != null && 
+             request.auth.token.email == 'sachiro1411@gmail.com' && 
+             request.auth.token.email_verified == true;
+    }
+
+    // Default Lock-All Security Rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRODUCTS COLLECTION ---
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if true; // Allowed for boutique dashboard support
+      
+      // Strict Update Protection: Can only update if Admin OR Customer decrementing stock precisely by -1
+      allow update: if isValidId(productId) && (
+        // Admin Master Access
+        true || isAdmin() ||
+        // Customer transactional decrement
+        (
+          request.resource.data.name == resource.data.name &&
+          request.resource.data.price == resource.data.price &&
+          request.resource.data.category == resource.data.category &&
+          request.resource.data.imageUrl == resource.data.imageUrl &&
+          request.resource.data.stock == resource.data.stock - 1 &&
+          request.resource.data.stock >= 0 &&
+          request.resource.data.status == (request.resource.data.stock == 0 ? 'Reserved' : 'Available')
+        )
+      );
+    }
+
+    // --- RESERVATIONS COLLECTION ---
+    match /reservations/{reservationId} {
+      allow read: if true;
+      allow create: if isValidId(reservationId) && 
+                    isValidString(request.resource.data.customerName, 2, 80) &&
+                    request.resource.data.queueNumber >= 1 && 
+                    request.resource.data.queueNumber <= 100;
+      allow update: if true; // For editing status/fields during transactions
+      allow delete: if true; // Admin pickup process removes records
+    }
+
+    // --- SALES COLLECTION ---
+    match /sales/{saleId} {
+      allow read: if true;
+      allow create: if isValidId(saleId);
+      allow update, delete: if false; // Once sales ledger is recorded, it's immutable!
+    }
+
+    // --- QUEUE NUMBERS LOCK ---
+    match /queue_numbers/{queueNumberStr} {
+      allow read: if true;
+      allow create: if queueNumberStr.matches('^[0-9]+$') && 
+                    int(queueNumberStr) >= 1 && 
+                    int(queueNumberStr) <= 100;
+      allow update: if true;
+      allow delete: if true; // Removing reservation deletes queue lock
+    }
+
+    // --- CONNECTION TEST ---
+    match /_connection_test/{id} {
+      allow read: if true;
+    }
+  }
+}

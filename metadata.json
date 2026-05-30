@@ -1,0 +1,6 @@
+{
+  "name": "bethCart",
+  "description": "A local neighborhood reservation store for browsing, carting, and reserving products with real-time stock updates, queue validation, and an admin dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, ui-monospace, monospace;
+}
+
+@layer base {
+  body {
+    background-color: #fbfcff;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    font-family: var(--font-sans);
+  }
+
+  /* Custom iOS-like Smooth Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+}
+
+/* Gradient Utility Animations */
+.bg-gradient-brand {
+  background: linear-gradient(135deg, #6C4CF1 0%, #8B5CF6 100%);
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #6C4CF1 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

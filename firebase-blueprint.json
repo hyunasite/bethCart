@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A database record of a store item available for reservation.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique ID of the product." },
+        "name": { "type": "string", "description": "Product name." },
+        "category": { "type": "string", "description": "Category like Tees, Hoodies, Accessories, etc." },
+        "price": { "type": "number", "description": "Price in Philippine Peso." },
+        "stock": { "type": "number", "description": "Remaining inventory stock." },
+        "imageUrl": { "type": "string", "description": "URL of the stored image." },
+        "status": { "type": "string", "enum": ["Available", "Reserved", "Sold"], "description": "Product availability status." }
+      },
+      "required": ["id", "name", "category", "price", "stock", "imageUrl", "status"]
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "description": "An active product reservation by a neighborhood customer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique reservation record ID." },
+        "productId": { "type": "string", "description": "ID of the reserved product." },
+        "productName": { "type": "string", "description": "Name of the reserved product." },
+        "productPrice": { "type": "number", "description": "Price at reservation time." },
+        "customerName": { "type": "string", "description": "Validated full name of customer." },
+        "queueNumber": { "type": "number", "description": "Assigned queue number (1-100)." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp of the reservation." }
+      },
+      "required": ["id", "productId", "productName", "productPrice", "customerName", "queueNumber", "timestamp"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "A successfully completed pickup transaction record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique transaction ID." },
+        "productId": { "type": "string", "description": "ID of the product sold." },
+        "productName": { "type": "string", "description": "Name of the product sold." },
+        "productPrice": { "type": "number", "description": "Price at transaction time." },
+        "quantity": { "type": "number", "description": "Quantity purchased." },
+        "customerName": { "type": "string", "description": "Customer name." },
+        "queueNumber": { "type": "number", "description": "Customer queue number." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp when transaction completed." },
+        "dateStr": { "type": "string", "description": "YYYY-MM-DD date representation." },
+        "timeStr": { "type": "string", "description": "HH:MM:SS time representation." }
+      },
+      "required": ["id", "productId", "productName", "productPrice", "quantity", "customerName", "queueNumber", "timestamp", "dateStr", "timeStr"]
+    },
+    "QueueNumberDoc": {
+      "title": "QueueNumberDoc",
+      "description": "Concurrency check document lock for currently active queue numbers (1-100).",
+      "type": "object",
+      "properties": {
+        "queueNumber": { "type": "number" },
+        "customerName": { "type": "string" },
+        "productId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["queueNumber", "customerName", "productId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Store inventory products."
+    },
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Active reservations waiting for pickup."
+    },
+    "/sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Completed transaction sales ledger entries."
+    },
+    "/queue_numbers/{queueNumberStr}": {
+      "schema": "QueueNumberDoc",
+      "description": "Locks active queue numbers to prevent duplication."
+    }
+  }
+}
